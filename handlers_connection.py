@@ -5,6 +5,7 @@ from imperal_sdk import ActionResult
 from convertkit_client import ConvertKitClient
 from app import chat
 from schemas import (
+    NoParams,
     ConnectParams, ConnectionIdParams, ConnectionList, ConnectionRecord, DeleteResult
 )
 
@@ -36,6 +37,15 @@ async def resolve_connection(ctx, connection_id: str = "") -> dict | None:
             return c
     return None
 
+@chat.function(
+    "connect_convertkit",
+    "Connect ConvertKit account via credentials.",
+    action_type="write",
+    chain_callable=True,
+    event="convertkit-connector.connect_convertkit",
+    effects=["create:connection"],
+    data_model=ConnectParams
+)
 async def connect_convertkit(params: ConnectParams, ctx) -> ActionResult[ConnectionRecord]:
     """Connect ConvertKit Connector."""
     client = ConvertKitClient(api_key=params.api_key, base_url=params.base_url)
@@ -54,11 +64,27 @@ async def connect_convertkit(params: ConnectParams, ctx) -> ActionResult[Connect
     await _save_connections(ctx, conns)
     return ActionResult.ok(ConnectionRecord(id=cid, label=record["label"], masked_key=_mask(params.api_key), base_url=params.base_url, is_active=True))
 
-async def list_connections(ctx) -> ActionResult[ConnectionList]:
+@chat.function(
+    "list_connections",
+    "List connected ConvertKit accounts.",
+    action_type="read",
+    chain_callable=True,
+    data_model=NoParams
+)
+async def list_connections(params: NoParams, ctx) -> ActionResult[ConnectionList]:
     conns = await _load_connections(ctx)
     records = [ConnectionRecord(id=c["id"], label=c["label"], masked_key=_mask(c.get("api_key", "")), base_url=c.get("base_url", ""), is_active=c.get("is_active", False)) for c in conns]
     return ActionResult.ok(ConnectionList(connections=records, total=len(records)))
 
+@chat.function(
+    "disconnect_convertkit",
+    "Disconnect ConvertKit account.",
+    action_type="write",
+    chain_callable=True,
+    event="convertkit-connector.disconnect_convertkit",
+    effects=["delete:connection"],
+    data_model=ConnectionIdParams
+)
 async def disconnect_convertkit(params: ConnectionIdParams, ctx) -> ActionResult[DeleteResult]:
     conns = await _load_connections(ctx)
     target = await resolve_connection(ctx, params.connection_id)
