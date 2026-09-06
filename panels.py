@@ -49,41 +49,50 @@ async def convertkit_sidebar(ctx, **kwargs) -> ui.UINode:
                 gap=2,
                 align="stretch",
                 children=[
-                    ui.Input(
-                        name="label",
-                        label="Connection Label",
-                        placeholder="e.g. Creator Account",
-                        value=""
+                    ui.Form(
+                        submit_label="Connect Kit",
+                        action=ui.Call("connect_convertkit"),
+                        children=[
+                            ui.Stack(
+                                direction="v",
+                                gap=2,
+                                align="stretch",
+                                children=[
+                                    ui.Stack(
+                                        direction="v",
+                                        gap=1,
+                                        align="stretch",
+                                        children=[
+                                            ui.Text("Connection Label", variant="label"),
+                                            ui.Input(param_name="label", placeholder="e.g. Creator Account"),
+                                        ]
+                                    ),
+                                    ui.Stack(
+                                        direction="v",
+                                        gap=1,
+                                        align="stretch",
+                                        children=[
+                                            ui.Text("Kit API Key / Bearer Token", variant="label"),
+                                            ui.Input(param_name="api_key", placeholder="Paste your Kit v4 API key or token"),
+                                        ]
+                                    ),
+                                    ui.Stack(
+                                        direction="v",
+                                        gap=1,
+                                        align="stretch",
+                                        children=[
+                                            ui.Text("API Endpoint (Optional)", variant="label"),
+                                            ui.Input(param_name="base_url", placeholder="https://api.kit.com/v4"),
+                                        ]
+                                    ),
+                                ]
+                            )
+                        ]
                     ),
-                    ui.Input(
-                        name="api_key",
-                        label="Kit API Key / Bearer Token",
-                        placeholder="Paste your Kit v4 API key or token",
-                        value="",
-                        type="password"
-                    ),
-                    ui.Input(
-                        name="base_url",
-                        label="API Endpoint (Optional)",
-                        placeholder="https://api.kit.com/v4",
-                        value=""
-                    ),
-                    ui.Button(
-                        "Connect Kit",
-                        variant="primary",
-                        on_click=ui.Call("connect_convertkit")
-                    )
                 ]
             ),
-            ui.Divider(),
-            ui.Stack(
-                direction="v",
-                gap=2,
-                align="stretch",
-                children=[
-                    _settings_button(),
-                    _help_modal()
-                ]
-            )
+            _help_modal(),
+            ui.Spacer(),
+            _settings_button(),
         ]
     )
