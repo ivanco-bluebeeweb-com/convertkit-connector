@@ -13,17 +13,17 @@ def _settings_button() -> ui.UINode:
     )
 
 def _help_modal() -> ui.UINode:
+    help_text = (
+        "1. Sign in to your Kit (ConvertKit) account and go to Settings > Advanced > API.\n"
+        "2. Copy your API Key or OAuth Bearer Token.\n"
+        "3. Paste it in the API Key field above and click Connect.\n"
+        "4. Ensure your token has permissions for subscribers, broadcasts, tags, sequences, and forms."
+    )
     return ui.Modal(
         trigger=ui.Button("How do I set this up?", variant="ghost", size="sm"),
         title="Connecting Kit (ConvertKit)",
         children=[
-            ui.Text(
-                "1. Sign in to your Kit (ConvertKit) account and go to Settings > Advanced > API.
-2. Copy your API Key or OAuth Bearer Token.
-3. Paste it in the API Key field above and click Connect.
-4. Ensure your token has permissions for subscribers, broadcasts, tags, sequences, and forms.",
-                variant="body"
-            )
+            ui.Text(help_text, variant="body")
         ]
     )
 
@@ -53,35 +53,36 @@ async def convertkit_sidebar(ctx, **kwargs) -> ui.UINode:
                         name="label",
                         label="Connection Label",
                         placeholder="e.g. Creator Account",
-                        type="text"
+                        value=""
                     ),
                     ui.Input(
                         name="api_key",
                         label="Kit API Key / Bearer Token",
                         placeholder="Paste your Kit v4 API key or token",
+                        value="",
                         type="password"
                     ),
                     ui.Input(
                         name="base_url",
                         label="API Endpoint (Optional)",
                         placeholder="https://api.kit.com/v4",
-                        type="text"
+                        value=""
                     ),
                     ui.Button(
                         "Connect Kit",
                         variant="primary",
                         on_click=ui.Call("connect_convertkit")
-                    ),
+                    )
                 ]
             ),
             ui.Divider(),
             ui.Stack(
-                direction="h",
+                direction="v",
                 gap=2,
-                align="center",
+                align="stretch",
                 children=[
                     _settings_button(),
-                    _help_modal(),
+                    _help_modal()
                 ]
             )
         ]
