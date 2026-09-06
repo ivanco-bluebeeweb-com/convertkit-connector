@@ -1,4 +1,4 @@
-"""Panel UI for ConvertKit Connector following UI_INTERFACE_STANDARD.md and AUTH_AND_CREDENTIALS_STANDARD.md."""
+"""Panel UI for ConvertKit (Kit) Connector following UI_INTERFACE_STANDARD.md and AUTH_AND_CREDENTIALS_STANDARD.md."""
 from __future__ import annotations
 from imperal_sdk import ui
 from app import ext
@@ -15,10 +15,13 @@ def _settings_button() -> ui.UINode:
 def _help_modal() -> ui.UINode:
     return ui.Modal(
         trigger=ui.Button("How do I set this up?", variant="ghost", size="sm"),
-        title="Connecting ConvertKit",
+        title="Connecting Kit (ConvertKit)",
         children=[
             ui.Text(
-                "1. Sign in to your ConvertKit account and navigate to API/Integration or OAuth settings.\n2. Choose your preferred authentication method (OAuth SSO, API Key / Personal Token, or Client Credentials / Service Account).\n3. Authorize or enter your credentials above and click Connect.",
+                "1. Sign in to your Kit (ConvertKit) account and go to Settings > Advanced > API.
+2. Copy your API Key or OAuth Bearer Token.
+3. Paste it in the API Key field above and click Connect.
+4. Ensure your token has permissions for subscribers, broadcasts, tags, sequences, and forms.",
                 variant="body"
             )
         ]
@@ -31,13 +34,13 @@ async def convertkit_sidebar(ctx, **kwargs) -> ui.UINode:
         gap=3,
         align="stretch",
         children=[
-            ui.Text("ConvertKit", variant="heading"),
+            ui.Text("Kit (ConvertKit)", variant="heading"),
             ui.Stack(
                 direction="v",
                 gap=1,
                 align="stretch",
                 children=[
-                    ui.Text("Manage your ConvertKit connections and integrations.", variant="caption"),
+                    ui.Text("Manage your Kit email subscribers, broadcasts, and automation sequences.", variant="caption"),
                 ]
             ),
             ui.Divider(),
@@ -46,66 +49,40 @@ async def convertkit_sidebar(ctx, **kwargs) -> ui.UINode:
                 gap=2,
                 align="stretch",
                 children=[
-                    ui.Button(
-                        "Sign in with ConvertKit (OAuth / SSO)",
-                        variant="primary",
-                        size="sm",
-                        icon="login"
+                    ui.Input(
+                        name="label",
+                        label="Connection Label",
+                        placeholder="e.g. Creator Account",
+                        type="text"
                     ),
-                    ui.Divider(),
-                    ui.Text("Or connect via API Key or Service Account", variant="caption"),
-                    ui.Form(
-                        submit_label="Connect ConvertKit",
-                        action=ui.Call("connect_convertkit"),
-                        children=[
-                            ui.Stack(
-                                direction="v",
-                                gap=2,
-                                align="stretch",
-                                children=[
-                                    ui.Stack(
-                                        direction="v",
-                                        gap=1,
-                                        align="stretch",
-                                        children=[
-                                            ui.Text("Authentication Method", variant="label"),
-                                            ui.Select(
-                                                param_name="auth_mode",
-                                                value="api_key",
-                                                options=[
-                                                    {"label": "API Key / Personal Access Token", "value": "api_key"},
-                                                    {"label": "OAuth 2.0 Bearer Token", "value": "oauth"},
-                                                    {"label": "Client Credentials (Service Account / Machine-to-Machine)", "value": "client_credentials"},
-                                                ]
-                                            ),
-                                        ]
-                                    ),
-                                    ui.Stack(
-                                        direction="v",
-                                        gap=1,
-                                        align="stretch",
-                                        children=[
-                                            ui.Text("Connection Label", variant="label"),
-                                            ui.Input(param_name="label", placeholder="e.g. Production ConvertKit"),
-                                        ]
-                                    ),
-                                    ui.Stack(
-                                        direction="v",
-                                        gap=1,
-                                        align="stretch",
-                                        children=[
-                                            ui.Text("API Key / Access Token", variant="label"),
-                                            ui.Input(param_name="api_key", placeholder="Paste API Key, Bearer or Access Token"),
-                                        ]
-                                    ),
-                                ]
-                            )
-                        ]
+                    ui.Input(
+                        name="api_key",
+                        label="Kit API Key / Bearer Token",
+                        placeholder="Paste your Kit v4 API key or token",
+                        type="password"
+                    ),
+                    ui.Input(
+                        name="base_url",
+                        label="API Endpoint (Optional)",
+                        placeholder="https://api.kit.com/v4",
+                        type="text"
+                    ),
+                    ui.Button(
+                        "Connect Kit",
+                        variant="primary",
+                        on_click=ui.Call("connect_convertkit")
                     ),
                 ]
             ),
-            _help_modal(),
-            ui.Spacer(),
-            _settings_button(),
+            ui.Divider(),
+            ui.Stack(
+                direction="h",
+                gap=2,
+                align="center",
+                children=[
+                    _settings_button(),
+                    _help_modal(),
+                ]
+            )
         ]
     )
