@@ -35,7 +35,7 @@ async def resolve_client(ctx, connection_id: str = "") -> ConvertKitClient:
     return ConvertKitClient(api_secret=conn["api_secret"], base_url=conn.get("base_url", ""))
 
 @chat.function("connect_convertkit_connector", "Connect ConvertKit account via credentials.", action_type="write", chain_callable=True, event="convertkit-connector.connect_convertkit_connector", effects=["create:connection"], data_model=ConnectionRecord)
-async def connect_convertkit_connector(params: ConnectParams, ctx) -> ActionResult:
+async def connect_convertkit_connector(ctx, params: ConnectParams) -> ActionResult:
     client = ConvertKitClient(api_secret=params.api_secret, base_url=params.base_url)
     res = await client.verify_auth()
     if res.get("status") == "error":
@@ -56,7 +56,7 @@ async def connect_convertkit_connector(params: ConnectParams, ctx) -> ActionResu
     return ActionResult.success(rec, summary=f"Connected ConvertKit ({rec['label']}).")
 
 @chat.function("list_connections", "List configured ConvertKit connections.", action_type="read", chain_callable=True, event="convertkit-connector.list_connections", effects=["read:connections"], data_model=ConnectionList)
-async def list_connections(params: NoParams, ctx) -> ActionResult:
+async def list_connections(ctx, params: NoParams) -> ActionResult:
     conns = await _load_conns(ctx)
     items = [{
         "id": c["id"],
@@ -68,7 +68,7 @@ async def list_connections(params: NoParams, ctx) -> ActionResult:
     return ActionResult.success({"connections": items, "total": len(items)}, summary=f"Found {len(items)} connection(s).")
 
 @chat.function("disconnect_convertkit_connector", "Disconnect ConvertKit account and delete stored credentials.", action_type="destructive", chain_callable=True, event="convertkit-connector.disconnect_convertkit_connector", effects=["delete:connection"], data_model=DeleteResult)
-async def disconnect_convertkit_connector(params: ConnectionIdParams, ctx) -> ActionResult:
+async def disconnect_convertkit_connector(ctx, params: ConnectionIdParams) -> ActionResult:
     conns = await _load_conns(ctx)
     if not conns:
         return ActionResult.error("No connections to disconnect.")
